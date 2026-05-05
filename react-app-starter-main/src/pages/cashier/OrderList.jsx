@@ -1,16 +1,17 @@
 // src/pages/cashier/OrderList.jsx
 // ไฟล์นี้จะเป็นคนจัดการ State (ข้อมูลจำลอง) และแสดงรายการการ์ด
 
-import React, { useState } from "react";
+/*import React, { useState } from "react";*/
 import { useNavigate } from "react-router-dom";
 import OrderCard from "../../component/cashier/OrderCard";
 import Sidebar from "../../component/shared/SideBar";
+import { usePos } from "../../context/PosContext"; //
 
 const OrderList = () => {
   const navigate = useNavigate();
 
   // 1. จำลองข้อมูล Order (มีทั้งแบบรอจ่าย และ จ่ายแล้ว)
-  const [orders, setOrders] = useState([
+  /*const [orders, setOrders] = useState([
     {
       orderId: "#SP-8829",
       status: "PENDING",
@@ -39,21 +40,28 @@ const OrderList = () => {
       table: null,
       totalAmount: 320.0,
     },
-  ]);
+  ]); */
 
-  // 2. ฟังก์ชันเมื่อกด Print Bill / Edit
+  // เพิ่ม: ดูดข้อมูลและฟังก์ชันมาจาก localDB
+  const { orders, changeOrderStatus, changeTableStatus } = usePos();
+
+  // เพิ่ม: กรองเอาเฉพาะออเดอร์ที่ยังไม่จ่ายเงิน (PENDING) มาแสดง
+  const activeOrders = orders.filter((order) => order.status === "PENDING");
+
+  // ฟังก์ชันเมื่อกด Print Bill / Edit
   const handlePrintBill = (orderId) => {
     // นำทางไปหน้า Checkout พร้อมแนบ orderId ไปด้วย
     navigate("/cashier/checkout", { state: { orderId: orderId } });
   };
 
-  // 3. ฟังก์ชันเมื่อกด PAID (ดันเข้า History & ลบออกจากหน้านี้)
+  // แก้ฟังก์ชันเมื่อกด PAID (ดันเข้า History & ลบออกจากหน้านี้)
   const handleMarkAsCompleted = (orderId) => {
     if (
-      window.confirm(`ยืนยันการเคลียร์โต๊ะและย้ายออเดอร์ ${orderId} ลงประวัติ?`)
+      window.confirm(
+        `ยืนยันการเคลียร์โต๊ะและย้ายออเดอร์ ${orderId} และบันทึกลงประวัติการสั่งซื้อ?`,
+      )
     ) {
-      // อนาคต: ตรงนี้จะยิง API ไปบอกหลังบ้านว่าเปลี่ยนสถานะโต๊ะเป็น FREE นะ
-
+      /* // อนาคต: ตรงนี้จะยิง API ไปบอกหลังบ้านว่าเปลี่ยนสถานะโต๊ะเป็น FREE นะ
       // อัปเดตหน้าจอ: กรองเอาออเดอร์นี้ออกจาก array (ลบออกจากลิสต์)
       setOrders((prevOrders) =>
         prevOrders.filter((order) => order.orderId !== orderId),
@@ -64,6 +72,25 @@ const OrderList = () => {
   //แยก Array ออเดอร์ออกเป็น 2 ฝั่ง
   const dineInOrders = orders.filter((order) => order.type === "DINE-IN");
   const takeawayDeliveryOrders = orders.filter(
+    (order) => order.type === "TAKE-AWAY" || order.type === "DELIVERY",
+  ); */
+
+      // เพิ่ม: หาข้อมูลออเดอร์นี้ขึ้นมาก่อนเพื่อเช็คว่านั่งโต๊ะไหน
+      const orderData = orders.find((o) => o.orderId === orderId);
+
+      // เพิ่ม: เปลี่ยนสถานะออเดอร์เป็น PAID
+      changeOrderStatus(orderId, "PAID");
+
+      // เพิ่ม: ถ้าออเดอร์นี้เป็น DINE-IN และมีเบอร์โต๊ะ ให้เปลี่ยนสถานะโต๊ะเป็น FREE
+      if (orderData && orderData.tableId) {
+        changeTableStatus(orderData.tableId, "FREE");
+      }
+    }
+  };
+
+  // แยก Array จากออเดอร์ที่ยังแอคทีฟอยู่ (activeOrders)
+  const dineInOrders = activeOrders.filter((order) => order.type === "DINE-IN");
+  const takeawayDeliveryOrders = activeOrders.filter(
     (order) => order.type === "TAKE-AWAY" || order.type === "DELIVERY",
   );
 

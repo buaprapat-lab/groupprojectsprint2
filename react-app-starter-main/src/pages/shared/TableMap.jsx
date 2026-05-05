@@ -5,8 +5,9 @@ import FloorPlanView from "../../component/shared/FloorPlanView";
 import TableListView from "../../component/shared/TableListView";
 import TableActionModal from "../../component/shared/TableActionModal";
 import Sidebar from "../../component/shared/SideBar";
+import { usePos } from "../../context/PosContext";
 
-const TableMap = () => {
+/*const TableMap = () => {
   // 1. Data State (จำลองข้อมูลโต๊ะ)
   const [tables, setTables] = useState([
     {
@@ -100,6 +101,11 @@ const TableMap = () => {
       y: 69,
     },
   ]);
+*/
+
+const TableMap = () => {
+  // ดูด tables และฟังก์ชันเปลี่ยนสถานะมาจาก PosContext.jsx
+  const { tables, changeTableStatus } = usePos();
 
   // 2. UI State
   const [currentFilter, setCurrentFilter] = useState("ALL");
@@ -160,7 +166,7 @@ const TableMap = () => {
   const selectedTable = tables.find((t) => t.id === modalState.tableId);
 
   // ฟังก์ชันอัพเดทสถานะโต๊ะ
-  const handleUpdateStatus = (id, newStatus) => {
+  /*const handleUpdateStatus = (id, newStatus) => {
     setTables(
       tables.map((t) => {
         if (t.id === id) {
@@ -178,6 +184,13 @@ const TableMap = () => {
         return t;
       }),
     );
+    setModalState({ isOpen: false, tableId: null }); // ปิด Modal
+  };
+  */
+
+  // เปลี่ยนไปใช้คำสั่งของ Context แทนการเซ็ต State เอง
+  const handleUpdateStatus = (id, newStatus) => {
+    changeTableStatus(id, newStatus); // สั่งอัปเดตลง Local Storage ทันที
     setModalState({ isOpen: false, tableId: null }); // ปิด Modal
   };
 
