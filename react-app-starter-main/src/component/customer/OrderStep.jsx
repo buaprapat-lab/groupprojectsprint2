@@ -1,13 +1,11 @@
 // src/component/customer/OrderStep.jsx
 import React, { useState, useEffect, useRef } from "react";
-// 🚨 นำเข้าไอคอน Drumstick (น่องไก่) มาใช้เป็น Loading ครับ
 import {
   Bike,
   Store,
   Utensils,
   CheckCircle2,
   Clock,
-  MapPin,
   Flame,
   Drumstick,
 } from "lucide-react";
@@ -23,10 +21,10 @@ export default function OrderStep() {
       id: 1,
       title: "DELIVERY",
       icon: Bike,
-      image: "/images/mascot-delivery.png",
+      image: "/images/step-delivery.png",
       desc: [
         "ส่งไว ทันใจวัยรุ่นหิว",
-        "ครอบคลุมพื้นที่พังโคน",
+        "ครอบคลุมกรุงเทพฯ และปริมณฑล",
         "รับประกันความกรอบ",
         "สั่งเลยตอนนี้!",
       ],
@@ -35,7 +33,7 @@ export default function OrderStep() {
       id: 2,
       title: "PICK UP STORE",
       icon: Store,
-      image: "/images/mascot-skate.png",
+      image: "/images/step-pickup.png",
       desc: [
         "สั่งล่วงหน้าผ่านเว็บ",
         "แวะโฉบมารับที่หน้าร้าน",
@@ -47,7 +45,7 @@ export default function OrderStep() {
       id: 3,
       title: "DINE-IN",
       icon: Utensils,
-      image: "/images/mascot-eat.png",
+      image: "/images/step-dinein.png",
       desc: [
         "แวะมานั่งชิลที่ร้าน",
         "เสพ Vibe สตรีทคัลเจอร์",
@@ -57,11 +55,31 @@ export default function OrderStep() {
     },
   ];
 
+  // แก้ไขตรงนี้: ANYWHERE เอา icon MapPin ออก แล้วแทนด้วย bgImage
   const finalePromises = [
     { title: "ANYTIME", icon: Clock, desc: "หิวเมื่อไหร่ จัดได้ทันที" },
-    { title: "ANYWHERE", icon: MapPin, desc: "ครอบคลุมทั่วพื้นที่พังโคน" },
-    { title: "ANY VIBE", icon: Flame, desc: "ปาร์ตี้บ้าน หรือชิลร้านก็สุด" },
+    {
+      title: " ",
+      bgImage: "/images/step-anywhere2.png",
+      desc: " ",
+    },
+    { title: "ANY VIBE", icon: Flame, desc: "ปาร์ตี้บ้าน หรือที่ร้านก็ชิลสุด" },
   ];
+
+  const scrollToCard = (index) => {
+    if (cardRefs.current[index]) {
+      const cardPosition =
+        cardRefs.current[index].getBoundingClientRect().top + window.scrollY;
+
+      const offset = window.innerWidth < 768 ? 250 : 350;
+      const offsetPosition = cardPosition - offset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth",
+      });
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -78,13 +96,9 @@ export default function OrderStep() {
         }
       });
 
-      // 🚨 ลอจิก Cinematic รูปแบบใหม่ (ขยายไวขึ้น แล้วค้างไว้อ่านนานขึ้น)
       if (finaleRef.current) {
         const rect = finaleRef.current.getBoundingClientRect();
         const scrolled = -rect.top;
-
-        // กำหนดระยะที่ใช้สำหรับ "การขยายกล่อง" (ใช้แค่ 70% ของความสูงจอ)
-        // ส่วนที่เหลือจะถูกปล่อยให้ค้างจอไว้นิ่งๆ ให้คนได้อ่านครับ
         const expandDistance = window.innerHeight * 0.7;
 
         if (scrolled >= 0) {
@@ -115,13 +129,22 @@ export default function OrderStep() {
         <div className="w-full max-w-7xl mx-auto px-4 md:px-8 mt-4 md:mt-12">
           <div className="flex flex-col md:flex-row gap-8 md:gap-16 relative items-start">
             <div className="md:w-1/3 w-full md:sticky md:top-[200px] flex flex-row md:flex-col justify-center gap-6 z-30 sticky top-[130px] bg-[#eeeeee]/90 md:bg-transparent backdrop-blur-md md:backdrop-blur-none py-4 md:border-none border-b border-gray-200">
-              {steps.map((step) => (
-                <div
+              {steps.map((step, index) => (
+                <button
                   key={step.id}
-                  className={`flex items-center gap-6 transition-all duration-300 ${activeStep === step.id ? "opacity-100" : "opacity-40"}`}
+                  onClick={() => scrollToCard(index)}
+                  className={`flex items-center gap-6 transition-all duration-300 cursor-pointer group outline-none ${
+                    activeStep === step.id
+                      ? "opacity-100"
+                      : "opacity-40 hover:opacity-80"
+                  }`}
                 >
                   <div
-                    className={`w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center transition-all duration-300 shrink-0 ${activeStep === step.id ? "bg-[#242424] text-white shadow-[4px_4px_0_#e4002b] -translate-y-1" : "bg-white text-[#242424] border-2"}`}
+                    className={`w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center transition-all duration-300 shrink-0 ${
+                      activeStep === step.id
+                        ? "bg-[#242424] text-white shadow-[4px_4px_0_#e4002b] -translate-y-1"
+                        : "bg-white text-[#242424] border-2 group-hover:border-[#242424]"
+                    }`}
                   >
                     <step.icon
                       size={activeStep === step.id ? 28 : 24}
@@ -129,20 +152,28 @@ export default function OrderStep() {
                     />
                   </div>
                   <span
-                    className={`font-['Bebas_Neue'] tracking-widest text-2xl hidden md:block transition-all duration-300 ${activeStep === step.id ? "text-[#242424] scale-110" : "text-gray-400"}`}
+                    className={`font-['Bebas_Neue'] tracking-widest text-2xl hidden md:block transition-all duration-300 text-left ${
+                      activeStep === step.id
+                        ? "text-[#242424] scale-110 ml-2"
+                        : "text-gray-400 group-hover:text-gray-600"
+                    }`}
                   >
                     {step.title}
                   </span>
-                </div>
+                </button>
               ))}
             </div>
 
-            <div className="md:w-2/3 flex flex-col gap-[30vh] w-full items-center md:items-start pb-[10vh]">
+            <div className="md:w-2/3 flex flex-col gap-16 md:gap-20 w-full items-center md:items-start pb-[10vh]">
               {steps.map((step, index) => (
                 <div
                   key={step.id}
                   ref={(el) => (cardRefs.current[index] = el)}
-                  className={`flex flex-col bg-white rounded-[24px] p-6 md:p-8 shadow-sm border w-full max-w-[480px] transition-all duration-700 ${activeStep === step.id ? "opacity-100 translate-y-0" : "opacity-30 translate-y-12"}`}
+                  className={`flex flex-col bg-white rounded-[24px] p-6 md:p-8 shadow-sm border w-full max-w-[480px] transition-all duration-700 ${
+                    activeStep === step.id
+                      ? "opacity-100 translate-y-0"
+                      : "opacity-30 translate-y-12"
+                  }`}
                 >
                   <div className="w-full h-[180px] md:h-[200px] relative mb-8 flex justify-center items-end">
                     <img
@@ -175,8 +206,6 @@ export default function OrderStep() {
         </div>
       </section>
 
-      {/* ─── พาร์ทที่ 2: ฉากจบขยายเต็มจอ (แช่หน้าจอให้อ่านได้นานขึ้น) ─── */}
-      {/* 🚨 เพิ่มความสูงเป็น 250vh เพื่อให้ตอนกล่องขยายเสร็จ มันจะล็อกค้างที่เดิมให้คนอ่านยาวๆ */}
       <section
         ref={finaleRef}
         className="w-full bg-[#eeeeee] h-[250vh] relative z-50"
@@ -190,7 +219,6 @@ export default function OrderStep() {
               borderRadius: `${(1 - expandProgress) * 40}px`,
             }}
           >
-            {/* 🚨 กิมมิค 1: น่องไก่ Loading (เฟดหายไปตอนกล่องขยายเกิน 50%) */}
             <div
               className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none transition-opacity duration-300"
               style={{ opacity: Math.max(0, 1 - expandProgress * 2) }}
@@ -200,12 +228,11 @@ export default function OrderStep() {
                 className="text-[#e4002b] animate-bounce"
                 strokeWidth={1.5}
               />
-              <span className="text-[#DC5F00] font-['Bebas_Neue'] tracking-widest mt-4 text-xl animate-pulse">
-                PREPARING THE CRUNCH...
+              <span className="text-[#ffffff] font-['Bebas_Neue'] tracking-widest mt-4 text-3xl animate-pulse">
+                READY TO ORDER ?
               </span>
             </div>
 
-            {/* 🚨 กิมมิค 2: เนื้อหาหลัก (เริ่มเฟดเข้ามาตอนกล่องขยายเกิน 60%) แถมมีเด้งขึ้นมานิดๆ */}
             <div
               className="w-full max-w-5xl mx-auto px-4 flex flex-col items-center transition-all duration-300"
               style={{
@@ -223,24 +250,41 @@ export default function OrderStep() {
                 {finalePromises.map((item, idx) => (
                   <div
                     key={idx}
-                    className="bg-white/5 border border-white/10 rounded-[20px] p-8 flex flex-col items-center text-center"
+                    className="relative bg-white/5 border border-white/10 rounded-[20px] p-8 flex flex-col items-center text-center overflow-hidden group"
                   >
-                    <div className="w-20 h-20 mb-6 rounded-full bg-[#e4002b] flex items-center justify-center text-white shadow-[0_0_15px_rgba(228,0,43,0.5)]">
-                      <item.icon size={36} strokeWidth={2.5} />
+                    {/* 🚨 พื้นหลังการ์ด: จะแสดงก็ต่อเมื่อมี item.bgImage (เช่นการ์ด ANYWHERE) */}
+                    {item.bgImage && (
+                      <div
+                        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-70 transition-opacity duration-500"
+                        style={{ backgroundImage: `url('${item.bgImage}')` }}
+                      ></div>
+                    )}
+
+                    <div className="relative z-10 flex flex-col items-center w-full">
+                      {/* 🚨 ลบเงา shadow-... เรืองแสงออก กลายเป็นสี Flat 2D */}
+                      {item.icon ? (
+                        <div className="w-20 h-20 mb-6 rounded-full bg-[#e4002b] flex items-center justify-center text-white">
+                          <item.icon size={36} strokeWidth={2.5} />
+                        </div>
+                      ) : (
+                        /* ดันพื้นที่เปล่าๆ ไว้สำหรับ ANYWHERE เพื่อให้ระดับตัวหนังสือเท่ากับการ์ดอื่น */
+                        <div className="h-[104px] w-full"></div>
+                      )}
+
+                      <h3 className="text-3xl font-['Bebas_Neue'] text-white mb-2">
+                        {item.title}
+                      </h3>
+                      <p className="font-['IBM_Plex_Sans_Thai'] text-gray-300">
+                        {item.desc}
+                      </p>
                     </div>
-                    <h3 className="text-3xl font-['Bebas_Neue'] text-white mb-2">
-                      {item.title}
-                    </h3>
-                    <p className="font-['IBM_Plex_Sans_Thai'] text-gray-300">
-                      {item.desc}
-                    </p>
                   </div>
                 ))}
               </div>
 
               <button className="bg-white text-[#242424] font-['Bebas_Neue'] text-2xl md:text-3xl tracking-widest py-4 md:py-5 px-16 shadow-[8px_8px_0_#e4002b] hover:translate-y-[4px] hover:translate-x-[4px] hover:shadow-[4px_4px_0_#e4002b] transition-all rounded-none border-2 border-white group relative overflow-hidden">
                 <span className="relative z-10 group-hover:text-white transition-colors duration-300">
-                  START YOUR PUNCH
+                  START YOUR ORDER
                 </span>
                 <div className="absolute inset-0 w-0 bg-[#e4002b] group-hover:w-full transition-all duration-300 ease-out z-0"></div>
               </button>

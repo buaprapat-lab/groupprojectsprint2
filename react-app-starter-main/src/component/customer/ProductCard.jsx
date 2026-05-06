@@ -3,14 +3,7 @@ import React from "react";
 import { Flame } from "lucide-react";
 
 export default function ProductCard({ item }) {
-  const getCustomImage = (id) => {
-    const customImages = {
-      p1: "/images/pro-4.png",
-      t1: "/images/pro-4.png",
-      n1: "/images/pro-4.png",
-    };
-    return customImages[id] || item?.image;
-  };
+  // 🚨 ลบ getCustomImage function ทิ้งไปเลย เพราะเราจะไม่ใช้รูป hardcode แล้ว
 
   const renderSticker = (badge) => {
     if (!badge) return null;
@@ -41,15 +34,20 @@ export default function ProductCard({ item }) {
   };
 
   return (
-    <div className="w-[240px] md:w-[280px] flex flex-col group cursor-pointer shrink-0">
+    <div className="w-60 md:w-[280px] flex flex-col group cursor-pointer shrink-0">
       {/* ─── Image Area: บังคับความสูงและตัดส่วนเกินทิ้ง (object-cover) ─── */}
-      <div className="relative w-full h-[320px] md:h-[380px] mb-4 overflow-hidden rounded-md bg-gray-100">
+      <div className="relative w-full h-80 md:h-[380px] mb-4 overflow-hidden rounded-md bg-gray-100">
         {renderSticker(item?.badge)}
         <img
-          src={getCustomImage(item?.id)}
+          // 🚨 แก้ไขตรงนี้: ดึงรูปจาก item.image มาใส่ตรงๆ เลย (รูปจาก DB)
+          src={item?.image}
           alt={item?.name}
-          // ใช้ object-cover เพื่อให้รูปเต็มกรอบพอดี (ตัดขอบที่ล้นออก)
+          // กรอบเดิมเป๊ะๆ: object-cover เพื่อให้รูปเต็มกรอบพอดี (ตัดขอบที่ล้นออก)
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 relative z-10"
+          onError={(e) => {
+            // เผื่อรูปจาก DB โหลดไม่ได้ ให้ซ่อนไว้เหมือนเดิม
+            e.target.style.display = "none";
+          }}
         />
       </div>
 
@@ -64,7 +62,7 @@ export default function ProductCard({ item }) {
           <span className="text-lg font-bold text-[#242424]">
             {item?.price}
           </span>
-          <button className="border-2 border-[#e4002b] text-[#e4002b] font-bold text-sm px-6 py-1 rounded-[4px] hover:bg-[#e4002b] hover:text-white transition-colors duration-200">
+          <button className="border-2 border-[#e4002b] text-[#e4002b] font-bold text-sm px-6 py-1 rounded-sm hover:bg-[#e4002b] hover:text-white transition-colors duration-200">
             Add
           </button>
         </div>
